@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>轉盤抽獎示範</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>抽到再來一次時才顯示轉盤</title>
   <style>
-    /* 讓頁面填滿視窗、背景示意 */
+    /* 讓頁面和視窗同高，並用 flex 置中，純示範外觀 */
     html, body {
       margin: 0; padding: 0;
       height: 100%;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
     }
     body {
+      font-family: Arial, sans-serif;
       background: url('novebg.jpg') no-repeat center center fixed;
       background-size: cover;
       position: relative;
@@ -20,8 +19,6 @@
       justify-content: center;
       align-items: center;
     }
-
-    /* 半透明遮罩 */
     .background-overlay {
       position: absolute;
       top: 0; left: 0;
@@ -30,16 +27,16 @@
       z-index: -1;
     }
 
-    /* 主要容器：置中 & 白底 */
+    /* 主要白色半透明容器 */
     .container {
       position: relative;
       max-width: 600px;
       width: 90%;
-      background-color: rgba(255, 255, 255, 0.7);
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
       text-align: center;
+      background-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
       color: #000;
       z-index: 1;
     }
@@ -72,7 +69,7 @@
       cursor: not-allowed;
     }
 
-    /* 顯示抽獎結果 */
+    /* 抽獎結果區域 */
     #resultsContainer {
       margin-top: 20px;
     }
@@ -94,6 +91,7 @@
       100% { opacity: 0.7; }
     }
     .retry {
+      display: inline-block;
       background-color: black;
       color: yellow;
       padding: 3px 6px;
@@ -113,19 +111,19 @@
       100% { transform: scale(1.2); }
     }
 
-    /* 大獎榜單固定左上 */
+    /* 大獎榜單 (固定於左上) */
     .leaderboard {
       position: fixed;
-      top: 20px;
-      left: 20px;
+      top: 20px; left: 20px;
       width: 240px;
       padding: 15px;
       background-color: rgba(255, 255, 255, 0.7);
       border-radius: 10px;
-      box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
       max-height: 300px;
       overflow-y: auto;
       color: #000;
+      z-index: 2;
     }
     .leaderboard h2 {
       margin: 0;
@@ -133,14 +131,15 @@
       text-align: center;
     }
     .leaderboard ul {
-      list-style: none; margin: 10px 0; padding: 0;
+      list-style: none;
+      margin: 10px 0; padding: 0;
     }
     .leaderboard li {
       margin-bottom: 5px;
       font-size: 0.9em;
     }
 
-    /* === 轉盤容器(彈窗/浮層) === */
+    /* 轉盤浮層：只有在抽到 RETRY 時才顯示 */
     .wheel-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -149,13 +148,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 999;  /* 在一切之上 */
+      z-index: 999;
     }
     .hidden {
       display: none !important;
     }
-
-    /* === 簡易轉盤效果 === */
     .wheel-container {
       position: relative;
       width: 250px;
@@ -170,36 +167,27 @@
         #ffc6ff 240deg 300deg,
         #9bf6ff 300deg 360deg
       );
-      /* 這裡用多彩扇形做示範 */
     }
-    /* 指針 */
     .wheel-pointer {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 4px;
-      height: 90px;
+      width: 4px; height: 90px;
       background: #333;
       transform-origin: bottom center;
       transform: translate(-50%, -100%);
       border-radius: 2px;
     }
-
-    /* 動畫：隨機旋轉 2~3秒 */
     @keyframes spinAnimation {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        /* 用 JS 決定最終 rotate() */
-      }
+      0% { transform: rotate(0deg); }
+      100% { /* 結束角度用 JS 動態設定 */ }
     }
   </style>
 </head>
 <body>
   <div class="background-overlay"></div>
 
-  <!-- 大獎榜單 (左上) -->
+  <!-- 榜單區域 -->
   <div class="leaderboard">
     <h2>大獎榜單</h2>
     <ul id="leaderboardList"></ul>
@@ -207,17 +195,16 @@
     <button onclick="copyLeaderboard()">複製榜單</button>
   </div>
 
-  <!-- 轉盤(浮層) -->
+  <!-- 轉盤：只有抽到 RETRY 時才顯示 -->
   <div id="wheelOverlay" class="wheel-overlay hidden">
     <div class="wheel-container" id="wheel">
-      <!-- 指針，可裝飾為箭頭或其他圖示 -->
       <div class="wheel-pointer"></div>
     </div>
   </div>
 
-  <!-- 主要抽獎容器 (置中) -->
+  <!-- 主要抽獎容器 -->
   <div class="container">
-    <h1>諾芙新人畢業紀念周邊抽獎</h1>
+    <h1>只有抽到再來一次才會顯示轉盤</h1>
     <div class="input-container">
       <input type="text" id="username" placeholder="請輸入您的名稱">
     </div>
@@ -233,7 +220,6 @@
     let currentUsername = "";
 
     document.addEventListener("DOMContentLoaded", () => {
-      // 綁定事件
       document.getElementById("singleDrawButton").addEventListener("click", () => singleDraw(false));
       document.getElementById("tenDrawButton").addEventListener("click", () => startDraw(10, false));
       document.getElementById("drawAgainButton").addEventListener("click", () => singleDraw(true));
@@ -242,7 +228,7 @@
       loadLeaderboard();
     });
 
-    // === 原本的抽獎流程 ===
+    // === 主抽獎流程 ===
     function startDraw(times, useCurrentName) {
       if (!useCurrentName) {
         const inputName = document.getElementById("username").value.trim();
@@ -258,19 +244,17 @@
       const resultsContainer = document.getElementById("resultsContainer");
       resultsContainer.innerHTML = "";
 
-      // 進行多次抽獎
-      let results = [];
+      let allResults = [];
       for (let i = 0; i < times; i++) {
-        // 原本是直接 getPrize()，現在改成 spinAndGetResult() => 可能一次包含多次RETRY
-        const subResults = spinAndGetResult();
-        // subResults 可能有多個結果 (例：連續抽到 RETRY)，只最後一個會是非 RETRY
-        // 或者您也可設計只顯示最後一次。這裡示範全部顯示。
-        results = results.concat(subResults);
+        // 取得單次結果（可能是普通結果 / RETRY -> 轉盤結果）
+        const drawResults = getFinalResultWithRetrySpinner();
+        // 將本次抽獎(含中途多次RETRY)的結果合併
+        allResults = allResults.concat(drawResults);
       }
 
-      // 統一顯示結果
-      results.forEach((r, index) => {
-        displayResult(r, index, results.length);
+      // 一次顯示所有結果
+      allResults.forEach((r, index) => {
+        displayResult(r, index, allResults.length);
       });
 
       document.getElementById("drawAgainButton").classList.remove("hidden");
@@ -281,43 +265,57 @@
       startDraw(1, useCurrentName);
     }
 
-    // === 改寫：以「轉盤」模擬抽獎 ===
-    // spinAndGetResult() 回傳一個「結果陣列」：
-    // 若有連續抽到 RETRY，就會連續產生多個結果 (RETRY...RETRY...直到非RETRY)
-    function spinAndGetResult() {
-      const resultArray = [];
-      let currentResult = "RETRY";  // 先設定成RETRY，好讓迴圈啟動
+    /**
+     * 取得最終結果
+     * 1. 先用 getPrize() 判斷有沒有抽到 RETRY
+     * 2. 如果不是 RETRY，就回傳 [結果]
+     * 3. 如果是 RETRY，就進入轉盤，直到抽到非 RETRY。
+     *    過程中可能會多次抽到 RETRY => 多次轉盤
+     *    把每次抽到的結果都放到陣列並回傳
+     */
+    function getFinalResultWithRetrySpinner() {
+      let firstResult = getPrize();
+      if (firstResult !== "RETRY") {
+        // 沒抽到再來一次，直接回傳
+        return [firstResult];
+      }
+      // 若一開始就抽到 RETRY => 進入轉盤
+      const retryResults = spinWheelAndGetAllResults();
+      return retryResults;
+    }
+
+    /**
+     * 只在「再來一次」的時候才會呼叫
+     * 可能觸發多次轉盤，直到抽到非 RETRY 才結束
+     */
+    function spinWheelAndGetAllResults() {
+      let results = [];
+      let currentResult = "RETRY";
 
       while (currentResult === "RETRY") {
-        // 執行轉盤動畫 + 取得結果
-        currentResult = doSpinAnimationAndGetPrize();
-        // 暫存本次結果
-        resultArray.push(currentResult);
+        // 顯示轉盤
+        showWheelOverlay();
+        // 開始轉盤動畫
+        spinWheelAnimation();
+
+        // 在此範例中，為簡化：馬上取得 getPrize() 結果
+        // 真實流程可用 setTimeout 或 animationend 事件後才決定抽到什麼
+        currentResult = getPrize();
+        results.push(currentResult);
+
+        // 2秒後關閉轉盤，以示範播放動畫
+        // (可視需求延長或改用 callback/promise 讓轉盤真實轉完才決定結果)
+        setTimeout(() => {
+          hideWheelOverlay();
+        }, 2000);
+
+        // 若又是 RETRY 就繼續下一輪 while
       }
 
-      return resultArray;
+      return results;
     }
 
-    // 轉盤動畫 + 取得結果 (單次)
-    // 這裡為了簡化，同步執行：實際可改用 async/await + Promise 等讓轉盤真的「等動畫結束」才回傳
-    function doSpinAnimationAndGetPrize() {
-      // 執行轉盤動畫 (模擬)
-      showWheelOverlay();    // 顯示轉盤畫面
-      spinWheelAnimation();  // 開始旋轉
-
-      // 假設轉盤旋轉約2~3秒後才取結果
-      // 這裡為簡化，直接「立刻取得結果」(您也可用 setTimeout 後才回傳)
-      const result = getPrize();
-
-      // 關掉轉盤畫面 (在實際專案可加 setTimeout() 讓動畫播放完再關)
-      setTimeout(() => {
-        hideWheelOverlay();
-      }, 2500);
-
-      return result;
-    }
-
-    // ===== 顯示/隱藏轉盤浮層 =====
+    // === 轉盤彈窗顯示/隱藏 ===
     function showWheelOverlay() {
       document.getElementById("wheelOverlay").classList.remove("hidden");
     }
@@ -325,21 +323,22 @@
       document.getElementById("wheelOverlay").classList.add("hidden");
     }
 
-    // ===== 轉盤動畫 =====
+    // === 轉盤動畫（單次）===
     function spinWheelAnimation() {
       const wheel = document.getElementById("wheel");
-      // 隨機旋轉：例如轉個最少 360 * 2圈 = 720度 ~ 360 * 5圈 = 1800度之間
-      const randomDeg = 720 + Math.floor(Math.random() * 1080); 
-      wheel.style.animation = `spinAnimation 2.5s cubic-bezier(.09,.79,.49,1.01) forwards`;
-      wheel.style.transform = `rotate(${randomDeg}deg)`;
-      // 為了讓動畫生效，每次要重設 animation 屬性
+      // 隨機轉到某個角度 (多圈)
+      const deg = 720 + Math.floor(Math.random() * 1080); // 2圈到5圈之間
+      wheel.style.animation = `spinAnimation 2s cubic-bezier(.09,.79,.49,1.01) forwards`;
+      wheel.style.transform = `rotate(${deg}deg)`;
+
+      // 監聽動畫結束事件，只做一次
       wheel.addEventListener("animationend", () => {
-        // 清除動畫屬性，避免下次再旋轉時沒效果
+        // 清除 animation 屬性，方便下次轉
         wheel.style.animation = "";
       }, { once: true });
     }
 
-    // === 與原本類似的 getPrize() ===
+    // === 與前相同的隨機抽獎邏輯 ===
     function getPrize() {
       const chance = Math.random() * 100;
       if (chance < 1) {
@@ -359,13 +358,12 @@
       }
     }
 
-    // === 顯示結果到畫面上 ===
+    // === 顯示抽獎結果 ===
     function displayResult(result, index, total) {
       const resultDiv = document.createElement("div");
-      resultDiv.className = "result";
+      resultDiv.classList.add("result");
       resultDiv.innerHTML = `<strong>${currentUsername} 的第 ${index + 1} 次抽獎結果：</strong> ${result}`;
 
-      // 特殊顯示
       if (result === "RETRY") {
         resultDiv.innerHTML += ' <span class="retry">再來一次</span>';
       } else if (result === "BAN600") {
@@ -376,7 +374,7 @@
       setTimeout(() => {
         resultDiv.classList.add("visible");
 
-        // 大獎就更新排行榜
+        // 如果是大獎 => 特別樣式 + 更新榜單
         if (result.includes("大獎")) {
           resultDiv.classList.add("special-winner");
           updateLeaderboard(currentUsername, result);
@@ -386,13 +384,15 @@
       document.getElementById("resultsContainer").appendChild(resultDiv);
     }
 
-    // === 停用抽獎按鈕一段時間 ===
+    // === 停用抽獎按鈕防洗板 ===
     function disableButtons() {
-      document.getElementById("singleDrawButton").disabled = true;
-      document.getElementById("tenDrawButton").disabled = true;
+      const singleBtn = document.getElementById("singleDrawButton");
+      const tenBtn = document.getElementById("tenDrawButton");
+      singleBtn.disabled = true;
+      tenBtn.disabled = true;
       setTimeout(() => {
-        document.getElementById("singleDrawButton").disabled = false;
-        document.getElementById("tenDrawButton").disabled = false;
+        singleBtn.disabled = false;
+        tenBtn.disabled = false;
       }, 2000);
     }
 
@@ -413,9 +413,9 @@
       if (Array.isArray(savedItems)) {
         const lb = document.getElementById("leaderboardList");
         lb.innerHTML = "";
-        savedItems.forEach(itemText => {
+        savedItems.forEach(text => {
           const li = document.createElement("li");
-          li.textContent = itemText;
+          li.textContent = text;
           lb.appendChild(li);
         });
       }
@@ -426,7 +426,8 @@
     }
     function copyLeaderboard() {
       const text = Array.from(document.getElementById("leaderboardList").children)
-        .map(li => li.textContent).join("\n");
+                        .map(li => li.textContent)
+                        .join("\n");
       navigator.clipboard.writeText(text).then(() => {
         alert("榜單內容已複製到剪貼簿！");
       });

@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>諾芙新人畢業紀念周邊抽獎</title>
+
   <style>
     /* 讓頁面與視窗同高，方便 Flex 垂直置中 */
     html, body {
@@ -13,41 +14,50 @@
     }
     body {
       font-family: Arial, sans-serif;
-      color: #fff;
       /* 全螢幕背景圖 */
       background: url('novebg.jpg') no-repeat center center fixed; 
       background-size: cover;
-      position: relative;
-      /* Flex 置中（水平 & 垂直） */
+
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
     }
 
-    /* 半透明黑色遮罩 */
+    /* 半透明黑色遮罩（在背景上層，但在主要內容下層） */
     .background-overlay {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
-      z-index: -1; /* 位於主內容之下 */
+      z-index: -1; 
     }
 
-    /* 主要內容容器：讓內容集中於畫面中央，並文字置中 */
+    /* ====== 主要容器，置中 & 白色半透明背景 ====== */
     .container {
       text-align: center;
       max-width: 600px;
+      width: 90%;           /* 小螢幕時可自動縮放 */
       padding: 20px;
       box-sizing: border-box;
-      z-index: 1; /* 務必在遮罩之上 */
+      z-index: 1;           /* 在半透明黑色遮罩之上 */
+      
+      /* 白色半透明遮罩背景 + 圓角 + 陰影 */
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+
+      /* 改用深色字體，以免白色背景看不清楚 */
+      color: #000;
     }
 
+    /* 標題（可以去掉原本的 text-shadow，提高可讀性） */
     h1 {
       font-size: 2em;
       margin-bottom: 20px;
-      text-shadow: -1px -1px 1px #fff, 1px -1px 1px #fff,
-                   -1px 1px 1px #fff, 1px 1px 1px #fff;
-      color: black;
+      /* 若想保留陰影，可調整深淺色或直接拿掉 */
+      /* text-shadow: -1px -1px 1px #fff, 1px -1px 1px #fff,
+                     -1px 1px 1px #fff, 1px 1px 1px #fff; */
     }
 
     .input-container {
@@ -80,30 +90,30 @@
     /* ====== 抽獎結果 ====== */
     #resultsContainer {
       margin-top: 20px;
-      /* 如需特別控制結果區塊高度，可自行加 max-height 及 overflow-y */
     }
     .result {
       margin-top: 10px;
       font-size: 18px;
-      text-shadow: 1px 1px 2px #000;
-      opacity: 0;  /* 用於淡入效果 */
+      opacity: 0;  
       transition: opacity 0.5s ease-in;
     }
     .result.visible {
       opacity: 1;
     }
+    /* 再來一次 (RETRY) 樣式 */
     .retry {
       display: inline-block;
-      background-color: black;
+      background-color: #000;
       color: yellow;
       padding: 5px 10px;
       border-radius: 5px;
       margin-left: 5px;
     }
+    /* BAN600 樣式 */
     .ban600 {
       color: yellow;
       font-size: 1.2em;
-      border: 2px solid black;
+      border: 2px solid #000;
       padding: 3px 8px;
       margin-left: 5px;
       animation: zoomInOut 0.5s infinite alternate;
@@ -137,13 +147,13 @@
       left: 20px;
       width: 240px;
       padding: 15px;
-      background-color: rgba(255, 255, 255, 0.3);
+      background-color: rgba(255, 255, 255, 0.7); /* 同樣可以用白色半透明 */
       border-radius: 10px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
       max-height: 300px; 
       overflow-y: auto;
-      color: #000;
-      z-index: 2; /* 確保在遮罩之上 */
+      z-index: 2;
+      color: #000; /* 與背景對比 */
     }
     .leaderboard h2 {
       margin: 0;
@@ -176,10 +186,10 @@
 </head>
 <body>
 
-  <!-- 半透明背景遮罩 -->
+  <!-- 半透明黑色整頁遮罩 -->
   <div class="background-overlay"></div>
 
-  <!-- 固定在左上的排行榜 -->
+  <!-- 大獎榜單固定在左上角 -->
   <div class="leaderboard">
     <h2>大獎榜單</h2>
     <ul id="leaderboardList"></ul>
@@ -187,7 +197,7 @@
     <button onclick="copyLeaderboard()">複製榜單</button>
   </div>
 
-  <!-- 中心內容區域 -->
+  <!-- 中心白色半透明容器 -->
   <div class="container">
     <h1>諾芙新人畢業紀念周邊抽獎</h1>
 
@@ -199,10 +209,10 @@
     <button id="singleDrawButton">抽獎一次</button>
     <button id="tenDrawButton">開始抽獎十次</button>
 
-    <!-- 結果顯示區 -->
+    <!-- 抽獎結果 -->
     <div id="resultsContainer"></div>
 
-    <!-- 重複抽獎按鈕 -->
+    <!-- 再抽一次按鈕 -->
     <button class="hidden" id="drawAgainButton">原本名稱再抽一次</button>
     <button class="hidden" id="drawTenAgainButton">再來十次</button>
   </div>
@@ -211,12 +221,12 @@
     let currentUsername = "";
 
     document.addEventListener("DOMContentLoaded", () => {
+      // 綁定事件
       document.getElementById("singleDrawButton").addEventListener("click", () => singleDraw(false));
       document.getElementById("tenDrawButton").addEventListener("click", () => startDraw(10, false));
       document.getElementById("drawAgainButton").addEventListener("click", () => singleDraw(true));
       document.getElementById("drawTenAgainButton").addEventListener("click", () => startDraw(10, true));
 
-      // 載入排行榜資料
       loadLeaderboard();
     });
 
@@ -255,7 +265,7 @@
       const chance = Math.random() * 100;
 
       if (chance < 1) {
-        // 大獎 1% 
+        // 大獎 1%
         const subChance = Math.random();
         if (subChance < 0.3) return "大獎 - 立牌（雙馬尾）";
         if (subChance < 0.6) return "大獎 - 立牌（長髮）";
@@ -276,24 +286,23 @@
       resultDiv.classList.add("result");
       resultDiv.innerHTML = `<strong>${currentUsername} 的第 ${index + 1} 次抽獎結果：</strong> ${result}`;
 
-      // 如果是再來一次或BAN600，附上額外標記
+      // 附加特殊標記
       if (result === "RETRY") {
         resultDiv.innerHTML += ' <span class="retry">再來一次</span>';
       } else if (result === "BAN600") {
         resultDiv.innerHTML += ' <span class="ban600">BAN600</span>';
       }
 
-      // 淡入顯示
       setTimeout(() => {
         resultDiv.classList.add("visible");
 
-        // 若是大獎，特別標註 & 更新排行榜
+        // 大獎處理
         if (result.includes("大獎")) {
           resultDiv.classList.add("special-winner");
           updateLeaderboard(currentUsername, result);
         }
 
-        // 若是「沒抽到」，有 10% 機率閃一下再灰掉
+        // 低機率讓「沒抽到」閃一下再灰掉
         if (result === "哈哈 沒抽到" && Math.random() < 0.1) {
           resultDiv.classList.add("special-winner");
           setTimeout(() => {
@@ -312,14 +321,13 @@
 
       singleBtn.disabled = true;
       tenBtn.disabled = true;
-
       setTimeout(() => {
         singleBtn.disabled = false;
         tenBtn.disabled = false;
       }, 2000);
     }
 
-    /* ============ 排行榜相關 ============ */
+    /* ===== 排行榜 ===== */
     function updateLeaderboard(name, prize) {
       const leaderboardList = document.getElementById("leaderboardList");
       const li = document.createElement("li");
@@ -329,8 +337,7 @@
     }
 
     function saveLeaderboard() {
-      const items = Array.from(document.getElementById("leaderboardList").children)
-                        .map(li => li.textContent);
+      const items = Array.from(document.getElementById("leaderboardList").children).map(li => li.textContent);
       localStorage.setItem("leaderboard", JSON.stringify(items));
     }
 
@@ -349,7 +356,7 @@
 
     function resetLeaderboard() {
       document.getElementById("leaderboardList").innerHTML = "";
-      localStorage.removeItem("leaderboard"); 
+      localStorage.removeItem("leaderboard");
     }
 
     function copyLeaderboard() {

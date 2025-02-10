@@ -1,69 +1,55 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>諾芙新人畢業紀念周邊抽獎</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>轉盤抽獎示範</title>
   <style>
-    /* 讓頁面與視窗同高，方便 Flex 垂直置中 */
+    /* 讓頁面填滿視窗、背景示意 */
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       height: 100%;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
     body {
-      font-family: Arial, sans-serif;
-      /* 全螢幕背景圖 */
-      background: url('novebg.jpg') no-repeat center center fixed; 
+      background: url('novebg.jpg') no-repeat center center fixed;
       background-size: cover;
-
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative;
     }
 
-    /* 半透明黑色遮罩（在背景上層，但在主要內容下層） */
+    /* 半透明遮罩 */
     .background-overlay {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
-      z-index: -1; 
+      z-index: -1;
     }
 
-    /* ====== 主要容器，置中 & 白色半透明背景 ====== */
+    /* 主要容器：置中 & 白底 */
     .container {
-      text-align: center;
+      position: relative;
       max-width: 600px;
-      width: 90%;           /* 小螢幕時可自動縮放 */
-      padding: 20px;
-      box-sizing: border-box;
-      z-index: 1;           /* 在半透明黑色遮罩之上 */
-      
-      /* 白色半透明遮罩背景 + 圓角 + 陰影 */
+      width: 90%;
       background-color: rgba(255, 255, 255, 0.7);
+      padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
-
-      /* 改用深色字體，以免白色背景看不清楚 */
+      text-align: center;
       color: #000;
+      z-index: 1;
     }
-
-    /* 標題（可以去掉原本的 text-shadow，提高可讀性） */
     h1 {
-      font-size: 2em;
       margin-bottom: 20px;
-      /* 若想保留陰影，可調整深淺色或直接拿掉 */
-      /* text-shadow: -1px -1px 1px #fff, 1px -1px 1px #fff,
-                     -1px 1px 1px #fff, 1px 1px 1px #fff; */
     }
-
     .input-container {
       margin-bottom: 20px;
     }
-    .input-container input[type="text"] {
+    .input-container input {
       padding: 8px;
       font-size: 16px;
       width: 60%;
@@ -71,7 +57,6 @@
       border-radius: 5px;
       border: 1px solid #ccc;
     }
-
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -87,41 +72,18 @@
       cursor: not-allowed;
     }
 
-    /* ====== 抽獎結果 ====== */
+    /* 顯示抽獎結果 */
     #resultsContainer {
       margin-top: 20px;
     }
     .result {
       margin-top: 10px;
       font-size: 18px;
-      opacity: 0;  
+      opacity: 0;
       transition: opacity 0.5s ease-in;
     }
     .result.visible {
       opacity: 1;
-    }
-    /* 再來一次 (RETRY) 樣式 */
-    .retry {
-      display: inline-block;
-      background-color: #000;
-      color: yellow;
-      padding: 5px 10px;
-      border-radius: 5px;
-      margin-left: 5px;
-    }
-    /* BAN600 樣式 */
-    .ban600 {
-      color: yellow;
-      font-size: 1.2em;
-      border: 2px solid #000;
-      padding: 3px 8px;
-      margin-left: 5px;
-      animation: zoomInOut 0.5s infinite alternate;
-      border-radius: 3px;
-    }
-    @keyframes zoomInOut {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.2); }
     }
     .special-winner {
       color: #00aaff;
@@ -131,29 +93,39 @@
       0% { opacity: 1; }
       100% { opacity: 0.7; }
     }
-    .gray-out {
-      color: #555;
-      animation: none;
-      transition: color 0.5s ease;
+    .retry {
+      background-color: black;
+      color: yellow;
+      padding: 3px 6px;
+      border-radius: 3px;
+      margin-left: 5px;
     }
-    .hidden {
-      display: none;
+    .ban600 {
+      color: yellow;
+      border: 2px solid black;
+      padding: 3px 6px;
+      animation: zoomInOut 0.5s infinite alternate;
+      border-radius: 3px;
+      margin-left: 5px;
+    }
+    @keyframes zoomInOut {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.2); }
     }
 
-    /* ====== 大獎榜單 (固定左上角) ====== */
+    /* 大獎榜單固定左上 */
     .leaderboard {
       position: fixed;
       top: 20px;
       left: 20px;
       width: 240px;
       padding: 15px;
-      background-color: rgba(255, 255, 255, 0.7); /* 同樣可以用白色半透明 */
+      background-color: rgba(255, 255, 255, 0.7);
       border-radius: 10px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-      max-height: 300px; 
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+      max-height: 300px;
       overflow-y: auto;
-      z-index: 2;
-      color: #000; /* 與背景對比 */
+      color: #000;
     }
     .leaderboard h2 {
       margin: 0;
@@ -161,35 +133,73 @@
       text-align: center;
     }
     .leaderboard ul {
-      list-style: none;
-      padding: 0;
-      margin: 10px 0;
+      list-style: none; margin: 10px 0; padding: 0;
     }
     .leaderboard li {
       margin-bottom: 5px;
       font-size: 0.9em;
     }
-    .leaderboard button {
-      width: 100%;
-      padding: 5px;
-      margin-top: 5px;
-      font-size: 0.8em;
-      cursor: pointer;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      margin-bottom: 5px;
+
+    /* === 轉盤容器(彈窗/浮層) === */
+    .wheel-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;  /* 在一切之上 */
+    }
+    .hidden {
+      display: none !important;
     }
 
+    /* === 簡易轉盤效果 === */
+    .wheel-container {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: conic-gradient(
+        #ffec99 0deg 60deg,
+        #ffd6e0 60deg 120deg,
+        #caffbf 120deg 180deg,
+        #bdb2ff 180deg 240deg,
+        #ffc6ff 240deg 300deg,
+        #9bf6ff 300deg 360deg
+      );
+      /* 這裡用多彩扇形做示範 */
+    }
+    /* 指針 */
+    .wheel-pointer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 90px;
+      background: #333;
+      transform-origin: bottom center;
+      transform: translate(-50%, -100%);
+      border-radius: 2px;
+    }
+
+    /* 動畫：隨機旋轉 2~3秒 */
+    @keyframes spinAnimation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        /* 用 JS 決定最終 rotate() */
+      }
+    }
   </style>
 </head>
 <body>
-
-  <!-- 半透明黑色整頁遮罩 -->
   <div class="background-overlay"></div>
 
-  <!-- 大獎榜單固定在左上角 -->
+  <!-- 大獎榜單 (左上) -->
   <div class="leaderboard">
     <h2>大獎榜單</h2>
     <ul id="leaderboardList"></ul>
@@ -197,24 +207,26 @@
     <button onclick="copyLeaderboard()">複製榜單</button>
   </div>
 
-  <!-- 中心白色半透明容器 -->
+  <!-- 轉盤(浮層) -->
+  <div id="wheelOverlay" class="wheel-overlay hidden">
+    <div class="wheel-container" id="wheel">
+      <!-- 指針，可裝飾為箭頭或其他圖示 -->
+      <div class="wheel-pointer"></div>
+    </div>
+  </div>
+
+  <!-- 主要抽獎容器 (置中) -->
   <div class="container">
     <h1>諾芙新人畢業紀念周邊抽獎</h1>
-
     <div class="input-container">
-      <input type="text" id="username" placeholder="請輸入您的名稱" />
+      <input type="text" id="username" placeholder="請輸入您的名稱">
     </div>
-
-    <!-- 抽獎按鈕 -->
     <button id="singleDrawButton">抽獎一次</button>
     <button id="tenDrawButton">開始抽獎十次</button>
 
-    <!-- 抽獎結果 -->
     <div id="resultsContainer"></div>
-
-    <!-- 再抽一次按鈕 -->
-    <button class="hidden" id="drawAgainButton">原本名稱再抽一次</button>
-    <button class="hidden" id="drawTenAgainButton">再來十次</button>
+    <button id="drawAgainButton" class="hidden">原本名稱再抽一次</button>
+    <button id="drawTenAgainButton" class="hidden">再來十次</button>
   </div>
 
   <script>
@@ -230,6 +242,7 @@
       loadLeaderboard();
     });
 
+    // === 原本的抽獎流程 ===
     function startDraw(times, useCurrentName) {
       if (!useCurrentName) {
         const inputName = document.getElementById("username").value.trim();
@@ -245,12 +258,19 @@
       const resultsContainer = document.getElementById("resultsContainer");
       resultsContainer.innerHTML = "";
 
-      const results = [];
+      // 進行多次抽獎
+      let results = [];
       for (let i = 0; i < times; i++) {
-        results.push(getPrize());
+        // 原本是直接 getPrize()，現在改成 spinAndGetResult() => 可能一次包含多次RETRY
+        const subResults = spinAndGetResult();
+        // subResults 可能有多個結果 (例：連續抽到 RETRY)，只最後一個會是非 RETRY
+        // 或者您也可設計只顯示最後一次。這裡示範全部顯示。
+        results = results.concat(subResults);
       }
-      results.forEach((result, index) => {
-        displayResult(result, index, results.length);
+
+      // 統一顯示結果
+      results.forEach((r, index) => {
+        displayResult(r, index, results.length);
       });
 
       document.getElementById("drawAgainButton").classList.remove("hidden");
@@ -261,9 +281,67 @@
       startDraw(1, useCurrentName);
     }
 
+    // === 改寫：以「轉盤」模擬抽獎 ===
+    // spinAndGetResult() 回傳一個「結果陣列」：
+    // 若有連續抽到 RETRY，就會連續產生多個結果 (RETRY...RETRY...直到非RETRY)
+    function spinAndGetResult() {
+      const resultArray = [];
+      let currentResult = "RETRY";  // 先設定成RETRY，好讓迴圈啟動
+
+      while (currentResult === "RETRY") {
+        // 執行轉盤動畫 + 取得結果
+        currentResult = doSpinAnimationAndGetPrize();
+        // 暫存本次結果
+        resultArray.push(currentResult);
+      }
+
+      return resultArray;
+    }
+
+    // 轉盤動畫 + 取得結果 (單次)
+    // 這裡為了簡化，同步執行：實際可改用 async/await + Promise 等讓轉盤真的「等動畫結束」才回傳
+    function doSpinAnimationAndGetPrize() {
+      // 執行轉盤動畫 (模擬)
+      showWheelOverlay();    // 顯示轉盤畫面
+      spinWheelAnimation();  // 開始旋轉
+
+      // 假設轉盤旋轉約2~3秒後才取結果
+      // 這裡為簡化，直接「立刻取得結果」(您也可用 setTimeout 後才回傳)
+      const result = getPrize();
+
+      // 關掉轉盤畫面 (在實際專案可加 setTimeout() 讓動畫播放完再關)
+      setTimeout(() => {
+        hideWheelOverlay();
+      }, 2500);
+
+      return result;
+    }
+
+    // ===== 顯示/隱藏轉盤浮層 =====
+    function showWheelOverlay() {
+      document.getElementById("wheelOverlay").classList.remove("hidden");
+    }
+    function hideWheelOverlay() {
+      document.getElementById("wheelOverlay").classList.add("hidden");
+    }
+
+    // ===== 轉盤動畫 =====
+    function spinWheelAnimation() {
+      const wheel = document.getElementById("wheel");
+      // 隨機旋轉：例如轉個最少 360 * 2圈 = 720度 ~ 360 * 5圈 = 1800度之間
+      const randomDeg = 720 + Math.floor(Math.random() * 1080); 
+      wheel.style.animation = `spinAnimation 2.5s cubic-bezier(.09,.79,.49,1.01) forwards`;
+      wheel.style.transform = `rotate(${randomDeg}deg)`;
+      // 為了讓動畫生效，每次要重設 animation 屬性
+      wheel.addEventListener("animationend", () => {
+        // 清除動畫屬性，避免下次再旋轉時沒效果
+        wheel.style.animation = "";
+      }, { once: true });
+    }
+
+    // === 與原本類似的 getPrize() ===
     function getPrize() {
       const chance = Math.random() * 100;
-
       if (chance < 1) {
         // 大獎 1%
         const subChance = Math.random();
@@ -281,89 +359,75 @@
       }
     }
 
+    // === 顯示結果到畫面上 ===
     function displayResult(result, index, total) {
       const resultDiv = document.createElement("div");
-      resultDiv.classList.add("result");
+      resultDiv.className = "result";
       resultDiv.innerHTML = `<strong>${currentUsername} 的第 ${index + 1} 次抽獎結果：</strong> ${result}`;
 
-      // 附加特殊標記
+      // 特殊顯示
       if (result === "RETRY") {
         resultDiv.innerHTML += ' <span class="retry">再來一次</span>';
       } else if (result === "BAN600") {
         resultDiv.innerHTML += ' <span class="ban600">BAN600</span>';
       }
 
+      // 淡入
       setTimeout(() => {
         resultDiv.classList.add("visible");
 
-        // 大獎處理
+        // 大獎就更新排行榜
         if (result.includes("大獎")) {
           resultDiv.classList.add("special-winner");
           updateLeaderboard(currentUsername, result);
-        }
-
-        // 低機率讓「沒抽到」閃一下再灰掉
-        if (result === "哈哈 沒抽到" && Math.random() < 0.1) {
-          resultDiv.classList.add("special-winner");
-          setTimeout(() => {
-            resultDiv.classList.remove("special-winner");
-            resultDiv.classList.add("gray-out");
-          }, 500);
         }
       }, index * 300);
 
       document.getElementById("resultsContainer").appendChild(resultDiv);
     }
 
+    // === 停用抽獎按鈕一段時間 ===
     function disableButtons() {
-      const singleBtn = document.getElementById("singleDrawButton");
-      const tenBtn = document.getElementById("tenDrawButton");
-
-      singleBtn.disabled = true;
-      tenBtn.disabled = true;
+      document.getElementById("singleDrawButton").disabled = true;
+      document.getElementById("tenDrawButton").disabled = true;
       setTimeout(() => {
-        singleBtn.disabled = false;
-        tenBtn.disabled = false;
+        document.getElementById("singleDrawButton").disabled = false;
+        document.getElementById("tenDrawButton").disabled = false;
       }, 2000);
     }
 
-    /* ===== 排行榜 ===== */
+    // === 排行榜 ===
     function updateLeaderboard(name, prize) {
-      const leaderboardList = document.getElementById("leaderboardList");
+      const lb = document.getElementById("leaderboardList");
       const li = document.createElement("li");
       li.textContent = `${name}: ${prize}`;
-      leaderboardList.appendChild(li);
+      lb.appendChild(li);
       saveLeaderboard();
     }
-
     function saveLeaderboard() {
       const items = Array.from(document.getElementById("leaderboardList").children).map(li => li.textContent);
       localStorage.setItem("leaderboard", JSON.stringify(items));
     }
-
     function loadLeaderboard() {
       const savedItems = JSON.parse(localStorage.getItem("leaderboard"));
       if (Array.isArray(savedItems)) {
-        const leaderboardList = document.getElementById("leaderboardList");
-        leaderboardList.innerHTML = "";
+        const lb = document.getElementById("leaderboardList");
+        lb.innerHTML = "";
         savedItems.forEach(itemText => {
           const li = document.createElement("li");
           li.textContent = itemText;
-          leaderboardList.appendChild(li);
+          lb.appendChild(li);
         });
       }
     }
-
     function resetLeaderboard() {
       document.getElementById("leaderboardList").innerHTML = "";
       localStorage.removeItem("leaderboard");
     }
-
     function copyLeaderboard() {
-      const leaderboardText = Array.from(document.getElementById("leaderboardList").children)
-        .map(item => item.textContent)
-        .join("\n");
-      navigator.clipboard.writeText(leaderboardText).then(() => {
+      const text = Array.from(document.getElementById("leaderboardList").children)
+        .map(li => li.textContent).join("\n");
+      navigator.clipboard.writeText(text).then(() => {
         alert("榜單內容已複製到剪貼簿！");
       });
     }
